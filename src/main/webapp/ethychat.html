@@ -1,0 +1,226 @@
+<!doctype>
+<html>
+
+<head>
+
+    <meta charset="utf-8"/>
+
+    <link rel="stylesheet" href="css/general.css" type="text/css">
+    <link rel="stylesheet" href="css/titlepage.css" type="text/css">
+    <link rel="stylesheet" href="css/chatpage.css" type="text/css">
+    <link rel="stylesheet" href="css/contactlist.css" type="text/css">
+    <link rel="stylesheet" href="css/conversation.css" type="text/css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script type="text/javascript" src="js/web3.min.js"></script>
+    <script type="text/javascript" src='js/bignumber.min.js'></script>
+    <script src="https://cdn.rawgit.com/ethereumjs/browser-builds/2fb69a714afe092b06645286f14b94f41e5c062c/dist/ethereumjs-tx.js"></script>
+	<script type="text/javascript" src="js/keythereum.min.js"></script>
+
+    <script type="text/javascript" src="js/ethutils.js"></script>
+    <script type="text/javascript" src="js/ethychat.js"></script>
+    <script type="text/javascript" src="js/input.js"></script>
+    <script type="text/javascript" src="js/popup.js"></script>
+    
+</head>
+
+<body onload="init()">
+
+    <div class="background">
+    </div>        
+
+    <div class="titlepage">
+        <div class="titlesection">
+            <div class="titlecontainer2">
+                <h1>Ethychat.</h1>
+                <h3>A blockchain messenger</h3>
+<!--
+                <h3>Send Ether and Words</h3>
+-->
+            </div>        
+            <div class="titlecontainer2">
+                <h4>Ethychat lets you exchange messages between any addresses on the Ethereum blockchain. Ethychat is free to use, only transaction costs incur and only for sending messages. All chats on Ethychat are public.</h4>
+            </div>        
+        </div>        
+        <div class="loginsection">
+            <div class="logincontainer">
+                <br><h2>Login with your Ethereum account</h2>
+                <input type="text" id="from" size="48"></input>&nbsp;&nbsp;<button type="button" onClick="loginButtonPressed()">Login</button>
+            </div>        
+        </div>        
+    </div>        
+
+    <div class="chatpage">
+        <div class="titlesection_s">
+            <div class="titlecontainer2_s">
+                <h1>Ethychat.</h1>
+            </div>        
+            <div class="titlecontainer2_s" id="loggedininfo">
+                <div id="loggedinname"></div>
+                <div id="loggedinbalance"></div>
+                <button type="button" id="logoutbutton" onClick="logout()">Log out</button>
+                <div id="loggedinimg"></div>
+            </div>      
+        </div>        
+
+        <div id="connectionsection">
+            <div class="column3" id="concol1">        
+                <span class="largertext" id="retrotime">Show the last
+                <select class="largerselect" id="sel_retrotime" onchange="retroTimeSelected()">
+                    <option value="5760">24 hours</option>
+                    <option value="17280">3 days</option>
+                    <option value="40320">week</option>
+                </select>
+                </span>
+            </div>
+            <div class="column3" id="concol2">        
+                <span class="largertext" id="targetaddress">You are connected to
+                 <select class="largerselect" id="sel_contact" onchange="addContactButtonPressed(event)">
+                    <option value="">Select or add contact</option>
+                </select>
+                </span>
+            </div>
+            <div class="column3" id="concol3">        
+                <span class="largertext" id="network">Use 
+                <select class="largerselect" id="sel_network" onchange="networkSelected(event)">
+                    <option value="rinkeby">Rinkeby</option>
+                    <option value="mainnet">Main</option>
+                </select>
+                &nbsp;Network
+                </span>
+            </div>
+        </div>        
+
+        <div class="spacesection_s"></div>        
+
+        <div class="mainheadersection">
+            <div class="column" id="selheader">
+                <h2>Connect</h2>
+            </div>        
+            <div class="column" id="comheader">
+                <h2>Communicate</h2>
+            </div>        
+            <div class="column" id="sendethheader">
+                <h2>Send Ether</h2>
+            </div>        
+        </div>
+
+        <div class="mainsection">
+            <div class="contactlist">
+                <div class="contactcard" id="contact_1">
+                    <div class="contactname">
+                        <input type="text" class="normalinput" id="to" size="30" placeholder="Enter Ethereum address"></input>
+                    </div>
+                    <img class="contactimg" src="img/icon_add.png" width="40" height="40">
+                    <button type="button" class="btn_send" id="connectbutton" onClick="connect(document.getElementById('to').value)">Add contact</button><br>                       
+                </div>
+<!--                 
+                <div class="contactcard" id="contact_0"></div>
+-->
+            </div>        
+
+            <div class="conversation">
+                <div class="sendform">
+                    <div class="txmessage">
+                        <input type="text" id="message" size="70" placeholder="Enter message"></input>
+                        <button type="button" class="btn_send" id="btn_sendmsg" onClick="sendMsgButtonPressed()">Send</button><br>
+                    </div>
+                </div>
+                <div class="message" id="-1"></div>
+            </div>        
+
+            <div class="column" id="transfer">
+                <div class="sendform">
+                    <div class="txmessage">
+                        <input type="text" id="trf_value" size="2" placeholder="Value"></input> ETH
+                        <input type="text" id="trf_data" size="25" placeholder="Enter data (optional)"></input>
+                        <button type="button" class="btn_send" id="btn_sendether" onClick="sendEther()">Send</button><br>
+                    </div>
+                </div>
+             </div>        
+        </div>        
+    </div>        
+
+
+    <div class="modal" id="txerror">
+        <div class="popup" id="pop_txerror">
+            <div class="popuperrheadline">Error</div>   
+            <div class="errhline"></div>
+            <div class="popupcontent">
+                <div id="pop_txerrormsg"> tx error </div>
+                <br><br>
+            </div>
+            <button type="button" class="btn_continue" onClick="closeTxErrorPopup()">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="authentication">
+        <div class="popup" id="pop_auth">
+            <div class="popupinputheadline">Transaction Authentication</div>   
+            <div class="inputhline"></div>
+            <div class="popupcontent">
+                How do you want to authenticate the transaction?<br>
+                <ul>
+                <li><input type="radio" name="authmethod" id="rad_keyfile" value="keyfile" onchange="selectauthmethod(event)"> With keyfile and password. Keyfile and password will not leave the browser.
+                    <ul>
+                        <li id="li_keyfile"> Select keyfile &nbsp; <input type="file" id="inp_keyfile" name="keyfilename" onchange="handleFileSelect(event)"></input></li>
+                        <li id="li_pwd"> Password: &nbsp; <input type="text" id="inp_pwd" size="60" placeholder="Enter password"></input></li>
+                    </ul>
+                </li>
+                <li><input type="radio" name="authmethod" id="rad_pkey" value="pkey" onchange="selectauthmethod(event)"> With my private key. The private key will not leave the browser.
+                    <ul>
+                        <li id="li_pkey"> Private key: &nbsp; <input type="text" id="inp_pkey" size="60" placeholder="Enter private key"></input></li>
+                    </ul>
+                </li>
+                </ul>
+                How long shall the authentication be valid?<br>
+                <ul>
+                    <li><input type="radio" name="authduration" id="rad_thistx" value="-1"> For this transaction only</li>
+                    <li><input type="radio" name="authduration" id="rad_10min" value="600"> For 10 minutes</li>
+                    <li><input type="radio" name="authduration" id="rad_1hr" value="3600"> For 1 hour</li>
+                </ul>
+                <br>
+            </div>
+            <button type="button" class="btn_cancel" onClick="cancelauth()">Cancel</button>
+            <button type="button" class="btn_continue" onClick="acceptauth()">Continue</button>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmsendeth">
+        <div class="popup" id="pop_confirmsendeth">
+            <div class="popupinputheadline">Transaction Confirmation</div>   
+            <div class="inputhline"></div>
+            <div class="popupcontent">
+                You are about to sendbr>
+                <div id="pop_sendethvalue"> X Eth </div>
+                to
+                <div id="pop_sendethtarget"> account </div>
+                <br><br>
+            </div>
+            <button type="button" class="btn_cancel" onClick="cancelsendeth()">Cancel</button>
+            <button type="button" class="btn_continue" onClick="acceptsendeth()">Confirm</button>
+        </div>
+    </div>
+
+    <div class="modal" id="addmsgtotx">
+        <div class="popup" id="pop_addmsgtotx">
+            <div class="popupinputheadline">Add Message</div>   
+            <div class="inputhline"></div>
+            <div class="popupcontent">
+                Your transaction of
+                <span id="pop_addmsgethvalue"> X Eth </span>
+                to
+                <span id="pop_addmsgtxtarget"> account </span>
+                was successful. <br><br> You can add a message to your transaction: <br>
+                <input type="text" id="addmessage" size="80" placeholder="Enter message"></input>
+                <br><br>
+            </div>
+            <button type="button" class="btn_cancel" onClick="cancelAddMsgPopup()">Proceed without message</button>
+            <button type="button" class="btn_continue" onClick="acceptAddMsgPopup()">Add message</button>
+        </div>
+    </div>
+
+</body>
+</html>

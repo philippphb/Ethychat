@@ -1,0 +1,30 @@
+div.message {
+}
+
+
+.txmessage {
+	background-color: rgba(255, 255, 255, 0.9);
+	margin: 5px;
+	padding: 5px;
+	border-radius: 5px;
+	box-shadow: 10px 10px 5px grey;
+}
+
+.rxmessage {
+	background-color: rgba(255, 255, 255, 0.9);
+	margin: 5px;
+	padding: 5px;
+	border-radius: 5px;
+	box-shadow: 10px 10px 5px grey;
+	text-align: right;
+}
+
+div.timestamp {
+	font-size: small;
+}
+
+div.msgtext {
+	font-size: large;
+}
+
+

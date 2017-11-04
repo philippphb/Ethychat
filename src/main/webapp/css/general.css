@@ -1,0 +1,142 @@
+
+
+.column3 {
+	float: left;
+}
+
+.largertext {
+	font-family: "Arial";
+	margin-left: 1em;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	font-size: 120%;
+}
+
+.largerselect {
+	font-family: "Arial";
+	margin-left: 1em;
+	font-size: 100%;
+}
+
+button {
+	font-family: "Arial";
+	text-align: center;
+	border-width: 0px;
+	border-radius: 5px;
+}
+
+.btn_send {
+	position: absolute;
+	font-size: 120%;
+	right: 0.5em;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	background-color: rgba(10, 10, 10, 0.5);
+	top: 0;
+	left: 0;
+	z-index: 100;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+}
+
+.popup {
+	position: absolute;
+	font-family: "Arial";
+	background-color: rgba(255, 255, 255, 1.0);
+	padding: 2em;
+	border-radius: 5px;
+	box-shadow: 10px 10px 5px grey;
+}
+
+.popupcontent {
+	overflow: auto;
+	height: 70%;
+}
+
+.btn_cancel {
+	position: absolute;
+	font-size: 150%;
+	bottom: 0.5em;
+	left: 1em;
+}
+
+.btn_continue {
+	position: absolute;
+	font-size: 150%;
+	bottom: 0.5em;
+	right: 1em;
+}
+
+.popupinputheadline {
+  font-size: 150%;	
+	color: #0000dd;
+}
+
+.inputhline {
+	background-color: #0000dd;
+  width: 100%;
+	margin-top: 0.5em;
+	margin-bottom: 2em;
+	height: 3px;
+	z-index: 200;
+}
+
+.popuperrheadline {
+  font-size: 150%;	
+	color: #dd0000;
+}
+
+.errhline {
+	background-color: #dd0000;
+  width: 100%;
+	margin-top: 0.5em;
+	margin-bottom: 2em;
+	height: 3px;
+	z-index: 200;
+}
+
+#pop_txerror {
+	top: 30%;
+	left: 20%;
+	height: 11em;
+	width: 50em;
+}
+
+#pop_auth {
+	top: 20%;
+	left: 20%;
+	height: 23em;
+	width: 50em;
+}
+
+#authentication ul {
+	list-style-type: none;
+}
+
+#pop_confirmsendeth {
+	top: 30%;
+	left: 20%;
+	height: 15em;
+	width: 50em;
+}
+
+#pop_sendethvalue {
+	font-size: 250%;
+	color: #0000dd;
+}
+
+#pop_sendethtarget {
+	font-size: 150%;
+	color: #0000dd;
+}
+
+#pop_addmsgtotx {
+	top: 30%;
+	left: 20%;
+	height: 12em;
+	width: 50em;
+}

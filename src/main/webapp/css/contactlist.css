@@ -1,0 +1,39 @@
+
+div.contactcard {
+	position: relative;
+	margin: 5px;
+	padding-right: : 5px;
+	padding-bottom: 5px;
+	background-color: rgba(255, 255, 255, 0.9);
+	width: 13.5em;
+	box-shadow: 10px 10px 5px grey;
+	float: left;
+}
+
+.contactimg {
+	padding: 5px;
+	float: left;
+}
+
+.contactname {
+	background-color: #bbbbbb;
+	margin: 0px;
+	padding: 3px;
+	font-size: 60%;
+	border-radius: 0px;
+}
+
+.msgstate {
+	margin-left: 15px;
+	margin-right: 10px;
+	padding: 0px;
+	font-size: 260%;
+	float: right;
+}
+
+.newmsgtext {
+	margin-top: 0.2em;
+	margin-right: 10px;
+	float: right;
+}
+
