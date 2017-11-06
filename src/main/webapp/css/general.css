@@ -4,6 +4,14 @@
 	float: left;
 }
 
+.normaltext {
+	font-family: "Arial";
+	margin-left: 1em;
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	font-size: 100%;
+}
+
 .largertext {
 	font-family: "Arial";
 	margin-left: 1em;
@@ -97,6 +105,23 @@ button {
 	margin-bottom: 2em;
 	height: 3px;
 	z-index: 200;
+}
+
+#header {
+  position: fixed;
+	top: 0;
+}
+
+#footer {
+  position: fixed;
+	bottom: 0;
+	padding: 0.25em;
+	height: 1.5em;
+}
+
+#sctext, #sctext a {
+	color: #ffffff;
+/*	font-weight: bold; */
 }
 
 #pop_txerror {

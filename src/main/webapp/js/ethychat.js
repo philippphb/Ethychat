@@ -3,7 +3,8 @@
 var ipaddr_prov_local = "http://localhost:8545";
 //var ipaddr_prov_rinkeby = "http://35.196.72.186:8545";
 var ipaddr_prov_rinkeby = "http://35.185.16.215:8545";
-var ipaddr_prov_main = "http://35.184.157.46:8545";
+//var ipaddr_prov_main = "http://104.197.142.219:8545";
+var ipaddr_prov_main = "http://104.197.142.219:17348";
 var ipaddr_prov;
 
 var Web3 = require('web3');
@@ -41,7 +42,7 @@ var messenger;
 // Contract addresses
 //var contractAddress_rinkeby = "0x4c065e75e4534cd51cf9660b2704da96c2ca6d89";
 var contractAddress_rinkeby = "0x4f2be1b85eee03e29e5b740f14f694b818f6141d";         // transactionHash: 0xebac0ed9db02a19f3e6859f42e8bd726a8d625dc4d8d1e247c48676264aff724
-var contractAddress_main = "0x";         // Main
+var contractAddress_main = "0x932864F3d9D86f52D574A93FE458b5254c6871DB";         // transactionHash: 0x26581e0196a42af96fe057ab0ce6a1711835f3735e5195e694a2bcb308edde4d
 var contractAddress;
 
 // Events for tracking contacts, messages and account information
@@ -66,6 +67,9 @@ function initPage() {
     $("#message").val("");
     $("#trf_value").val("0");
     $("#trf_data").val("");
+
+    $("#conversation").hide();
+    $("#transfer").hide();
 
     numLookBackBlocks = parseInt($("#sel_retrotime").val());
     ipaddr_prov = ipaddr_prov_rinkeby;
@@ -269,6 +273,9 @@ function logout() {
 
     $(".titlepage").show();
     $(".chatpage").hide();
+    
+    $("#conversation").hide();
+    $("#transfer").hide();
 };
 
 function login() {
@@ -286,6 +293,9 @@ function login() {
 
         $(".chatpage").show();
         $(".titlepage").hide();
+
+        $("#conversation").hide();
+        $("#transfer").hide();
 
         // Update header with account info of logged in account
         document.getElementById('loggedinname').innerHTML = myaddress;
@@ -401,6 +411,9 @@ function connect(targetadr) {
 
         // Select the target address in the drop down menu
         $("#sel_contact").val(targetadr);
+
+        $("#conversation").show();
+        $("#transfer").show();
 
 //        clearMessages();
 
