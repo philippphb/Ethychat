@@ -9,7 +9,7 @@ var authduration = -1;
 // Authentication parameters
 var mypwd = "";
 var keyfileObject = "";
-var pke = "";
+var pkey = "";
 
 // Size and position of a ring buffer for transactions to be carried out 
 var ringbufsize = 100;
@@ -61,6 +61,44 @@ function lightVerifyAddress(addr) {
 // Returns undefined if the passed string is not an Ethereum address
 function fullVerifyAddress(addr) {
 	return verifyHexStr(lightVerifyAddress(addr));
+}
+
+function cleanupText(str) {
+
+	if (str === undefined) return undefined;
+
+	var cleanstr = "";
+	
+	var istag = false;
+	var tagstr = "";
+	
+	for (var p=0; p<str.length; p++) {
+		
+		var curchar = str.charAt(p);
+		
+		if (curchar === "<") istag = true;		
+		
+		if (istag) tagstr += curchar;
+		else cleanstr += curchar;
+		
+		if (curchar === ">") {
+			
+			if (tagstr.startsWith("<a ") || tagstr === "</a>"
+					|| tagstr === "<b>" || tagstr === "</b>"
+					|| tagstr === "<p>" || tagstr === "</p>"
+					|| tagstr.startsWith("<h") || tagstr.startsWith("</h")
+					|| tagstr === "<ul>" || tagstr === "</ul>"
+					|| tagstr === "<ol>" || tagstr === "</ol>"
+					|| tagstr.startsWith("<img ")) {
+				cleanstr += tagstr;
+			}
+			
+			istag = false;
+			tagstr = "";
+		}
+	}
+	
+	return cleanstr;
 }
 
 // Converts the passed string into UTF-8 encoding

@@ -177,7 +177,7 @@ function printMessage2(msgid, msgdate, from, text, msgclass, msgbgcolor) {
         // Put message into conversation, order descending by message id
         if (parseInt(message.id) < parseInt(msgid)) {
             //$("#"+message.id).before("<div class=\"message\" id=\"" + msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> (" + msgid + "), " + msgdate + " </div> <div class=\"msgtext\">" + text + "</div></div></div>");
-            $("#"+message.id).before("<div class=\"message\" id=\"" + msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + text + "</div></div></div>");
+            $("#"+message.id).before("<div class=\"message\" id=\"" + msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + cleanupText(text) + "</div></div></div>");
             $("#"+msgid).children().css("backgroundColor", msgbgcolor);
 
             break;
@@ -202,7 +202,7 @@ function printMessage(ethevent, msgclass, msgbgcolor) {
         // Put message into conversation, order descending by message id
         if (parseInt(message.id) < parseInt(ethevent.args.msgid)) {
             //$("#"+message.id).before("<div class=\"message\" id=\"" + ethevent.args.msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> (" + ethevent.args.msgid + "), " + msgdate + " </div> <div class=\"msgtext\">" + ethevent.args.msgtext + "</div></div></div>");
-            $("#"+message.id).before("<div class=\"message\" id=\"" + ethevent.args.msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + ethevent.args.msgtext + "</div></div></div>");
+            $("#"+message.id).before("<div class=\"message\" id=\"" + ethevent.args.msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + cleanupText(ethevent.args.msgtext) + "</div></div></div>");
             if (connectBlockNo <= ethevent.blockNumber) $("#"+ethevent.args.msgid).children().css("backgroundColor", msgbgcolor);
 
             break;
