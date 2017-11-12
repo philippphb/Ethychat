@@ -8,11 +8,22 @@ function retroTimeSelected() {
     numLookBackBlocks = parseInt($("#sel_retrotime").val());
     startBlockNo = web3.eth.blockNumber - numLookBackBlocks;
 
+    clearContactList();
+    clearMessages();
+
     setupGeneralWatchers();
     setupContactWatchers();
 }
 
 function networkSelected(evt) {
+
+	stopGeneralWatchers();
+    stopContactWatchers();
+
+    clearContactList();
+    clearMessages();
+    
+    targetaddress = "";
 
 	// Use testnet by default
     ipaddr_prov = ipaddr_prov_rinkeby;

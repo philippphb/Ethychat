@@ -1,4 +1,4 @@
-
+/*
 // web3 provider addresses
 var ipaddr_prov_local = "http://localhost:8545";
 //var ipaddr_prov_rinkeby = "http://35.196.72.186:8545";
@@ -9,7 +9,7 @@ var ipaddr_prov;
 
 var Web3 = require('web3');
 var web3 = new Web3();
-
+*/
 // Number of blocks in the past to look at
 var numLookBackBlocks;
 
@@ -93,11 +93,11 @@ function initSec() {
     $("#li_keyfile").hide();
     $("#li_pwd").hide();
 };
-
+/*
 function initEth() {
     web3.setProvider(new web3.providers.HttpProvider(ipaddr_prov));
 };
-
+*/
 function connectBlockchain() {
 
 	try {
@@ -161,6 +161,23 @@ function maintainContactList(contactaddr, blocknr) {
         $("#"+contacts.get(0).id).before("<div class=\"contactcard\" id=\"contact_" + contactaddr.toLowerCase() + "\" onclick=\"connect(\'" + contactaddr + "\')\"> <div class=\"contactname\">" + contactaddr + "</div> <img class=\"contactimg\" src=\"https://www.gravatar.com/avatar/" + contactaddr.substring(2,contactaddr.length).toLowerCase() + "?d=retro&s=40\">" + "<div class=\"newmsgtext\">new<br>messages</div> <div class=\"msgstate\"> <span class=\"numnewmsgs\" id=\"numnewmsgs_" +  contactaddr.toLowerCase() + "\"> </span> </div></div>");
         $("#sel_contact").append($('<option></option>').val(contactaddr).html(contactaddr));
     }
+};
+
+function clearContactList() {
+
+    var contacts = $(".contactcard");
+
+    // Loop through all contact card divs
+    for (var i=0; i<contacts.length; i++) {
+        var contact = contacts.get(i);
+
+        // Remove all contact cards but the add card
+        if (contact.id !== "contact_1") $("#"+contact.id).remove();
+}
+
+    // Adjust number of new messages and update display
+    numnewmsgs[targetaddress] = 0;
+    updateNumMessageDisplay(targetaddress);
 };
 
 function printMessage2(msgid, msgdate, from, text, msgclass, msgbgcolor) {
@@ -265,6 +282,10 @@ function clearMessages() {
 
 function logout() {
 
+	stopGeneralWatchers();
+    stopContactWatchers();
+	
+    clearContactList();
     clearMessages();
     resetTxHandling();
 
@@ -314,12 +335,20 @@ function login() {
     }
 };
 
-function setupGeneralWatchers() {
+function stopGeneralWatchers() {
 
     if (receiveAllEvent !== undefined) receiveAllEvent.stopWatching();
     if (sentAllEvent !== undefined) sentAllEvent.stopWatching();
     if (newBlockFilter !== undefined) newBlockFilter.stopWatching();
+}
 
+function setupGeneralWatchers() {
+
+    //if (receiveAllEvent !== undefined) receiveAllEvent.stopWatching();
+    //if (sentAllEvent !== undefined) sentAllEvent.stopWatching();
+    //if (newBlockFilter !== undefined) newBlockFilter.stopWatching();
+    stopGeneralWatchers();
+    
     numnewmsgs = {};
 
     // Event to track received messages for maintaining contact list and number of new messages
@@ -424,13 +453,20 @@ function connect(targetadr) {
     }
 };
 
+function stopContactWatchers() {
+
+    if (receiveMessageEvent !== undefined) receiveMessageEvent.stopWatching();
+    if (sentMessageEvent !== undefined) sentMessageEvent.stopWatching();
+}
+
 function setupContactWatchers() {
 
     clearMessages();
 
-    if (receiveMessageEvent !== undefined) receiveMessageEvent.stopWatching();
-    if (sentMessageEvent !== undefined) sentMessageEvent.stopWatching();
-
+    //if (receiveMessageEvent !== undefined) receiveMessageEvent.stopWatching();
+    //if (sentMessageEvent !== undefined) sentMessageEvent.stopWatching();
+    stopContactWatchers();
+    
     // Event to track received messages for conversation
     receiveMessageEvent = messenger.ReceiveMessage({to: myaddress, from: targetaddress}, {fromBlock: startBlockNo, toBlock: 'latest'});
     receiveMessageEvent.watch(function(error, result) {
