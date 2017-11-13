@@ -320,7 +320,7 @@ function login() {
 
         // Update header with account info of logged in account
         document.getElementById('loggedinname').innerHTML = myaddress;
-        document.getElementById('loggedinimg').innerHTML = "<img src=\"https://www.gravatar.com/avatar/" + myaddress.substring(2,34).toLowerCase() + "?d=retro&s=64&f=y\">";
+        document.getElementById('loggedinimg').innerHTML = "<img src=\"https://www.gravatar.com/avatar/" + myaddress.substring(2,34).toLowerCase() + "?d=retro&s=64\">";
         document.getElementById('loggedinbalance').innerHTML = web3.eth.getBalance(myaddress).dividedBy(new BigNumber("1000000000000000000")) + " ETH ";
 
         // Reset security relevant account specific variables with every login

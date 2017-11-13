@@ -286,13 +286,24 @@ function sendSignedTransaction() {
     var callback = curtx_callback;
 
     removeCurTransaction();
-
-    // Extract provate key if required
-	if (authmethod === "keyfile" && pkey === "") {	
-	    pkey = keythereum.recover(mypwd, keyfileObject);
+		
+    let privateKey;
+    
+	try {
+		// Extract private key if required
+		if (authmethod === "keyfile" && pkey === "") {	
+			pkey = keythereum.recover(mypwd, keyfileObject);
+		}
+	
+		privateKey = new EthJS.Buffer.Buffer(pkey, 'hex');
 	}
-
-    let privateKey = new EthJS.Buffer.Buffer(pkey, 'hex')
+    catch(err) {
+    	showError("Error with private key. " + err);
+    	resetAuth();
+	    txProcessing = false;
+	    processTransactions();
+	    return;
+    }
 
     // Reset authentication parameters if validity was for a single transaction only
     if (authduration < 0) resetAuth();
@@ -317,18 +328,22 @@ function sendSignedTransaction() {
     		data: data,
     		chainId: 3
     };
-
-	// Sign and send transactrion
-    try {
+	
+	try {
+		// Sign and send transactrion
         let tx = new EthJS.Tx(txParams);
         tx.sign(privateKey);
         let serializedTx = "0x" + tx.serialize().toString('hex');
         web3.eth.sendRawTransaction(serializedTx, callback);
     }
     catch(err) {
-    	showError(err);
+    	showError("Error during signing transaction. " + err);
+    	resetAuth();
+        txProcessing = false;
+        processTransactions();
+        return;
     }
-
+	
     txProcessing = false;
     processTransactions();
 };
