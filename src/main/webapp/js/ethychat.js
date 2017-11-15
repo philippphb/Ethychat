@@ -32,6 +32,10 @@ var contractAddress_rinkeby = "0x4f2be1b85eee03e29e5b740f14f694b818f6141d";     
 var contractAddress_main = "0x932864F3d9D86f52D574A93FE458b5254c6871DB";         // transactionHash: 0x26581e0196a42af96fe057ab0ce6a1711835f3735e5195e694a2bcb308edde4d
 var contractAddress;
 
+// Ethereum network ids
+var networkid_rinkeby = 4;
+var networkid;
+
 // Events for tracking contacts, messages and account information
 var receiveAllEvent;
 var sentAllEvent;
@@ -62,6 +66,8 @@ function initPage() {
     ipaddr_prov = ipaddr_prov_rinkeby;
     contractAddress = contractAddress_rinkeby;
 
+    networkid = networkid_rinkeby;
+    
     initSec();
 };
 

@@ -326,7 +326,7 @@ function sendSignedTransaction() {
     		to: receiver,
     		value: amount, 
     		data: data,
-    		chainId: 3
+    		chainId: networkid
     };
 	
 	try {

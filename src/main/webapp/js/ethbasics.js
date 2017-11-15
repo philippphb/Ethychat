@@ -9,4 +9,5 @@ var web3 = new Web3();
 
 function initEth() {
     web3.setProvider(new web3.providers.HttpProvider(ipaddr_prov));
+    networkid = web3.version.network;
 };
