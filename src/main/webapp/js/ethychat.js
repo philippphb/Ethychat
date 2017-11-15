@@ -108,16 +108,16 @@ function updateNumMessageDisplay(contactaddr) {
 
     // Adapt appearance if new messages are available 
     if (numnewmsgs[contactaddr] > 0) {
-        $("#contact_" + targetaddress + " .numnewmsgs").css("color", "#00b000");
-        $("#contact_" + targetaddress + " .newmsgtext").css("color", "#00b000");
-        $("#contact_" + targetaddress + " .numnewmsgs").css("font-weight", "bold");
-        $("#contact_" + targetaddress + " .newmsgtext").css("font-weight", "bold");
+        $("#contact_" + contactaddr + " .numnewmsgs").css("color", "#00b000");
+        $("#contact_" + contactaddr + " .newmsgtext").css("color", "#00b000");
+        $("#contact_" + contactaddr + " .numnewmsgs").css("font-weight", "bold");
+        $("#contact_" + contactaddr + " .newmsgtext").css("font-weight", "bold");
     }
     else {
-        $("#contact_" + targetaddress + " .numnewmsgs").css("color", "#000000");
-        $("#contact_" + targetaddress + " .newmsgtext").css("color", "#000000");
-        $("#contact_" + targetaddress + " .numnewmsgs").css("font-weight", "normal");
-        $("#contact_" + targetaddress + " .newmsgtext").css("font-weight", "normal");
+        $("#contact_" + contactaddr + " .numnewmsgs").css("color", "#000000");
+        $("#contact_" + contactaddr + " .newmsgtext").css("color", "#000000");
+        $("#contact_" + contactaddr + " .numnewmsgs").css("font-weight", "normal");
+        $("#contact_" + contactaddr + " .newmsgtext").css("font-weight", "normal");
     }
 };
 
@@ -358,7 +358,7 @@ function setupGeneralWatchers() {
             var addr = result.args.from;
             if (addr != targetaddress) {
                 if (numnewmsgs[addr] === undefined) numnewmsgs[addr] = 0;
-                numnewmsgs[result.args.from]++;
+                numnewmsgs[addr]++;
                 updateNumMessageDisplay(addr);
             }
         }
@@ -380,7 +380,7 @@ function setupGeneralWatchers() {
             var addr = result.args.to;
             if (addr != targetaddress) {
                 if (numnewmsgs[addr] === undefined) numnewmsgs[addr] = 0;
-                numnewmsgs[result.args.from]++;
+                numnewmsgs[addr]++;
                 updateNumMessageDisplay(addr);
             }
         }
