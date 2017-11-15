@@ -1,15 +1,4 @@
-/*
-// web3 provider addresses
-var ipaddr_prov_local = "http://localhost:8545";
-//var ipaddr_prov_rinkeby = "http://35.196.72.186:8545";
-var ipaddr_prov_rinkeby = "http://35.185.16.215:8545";
-//var ipaddr_prov_main = "http://104.197.142.219:8545";
-var ipaddr_prov_main = "http://104.197.142.219:17348";
-var ipaddr_prov;
 
-var Web3 = require('web3');
-var web3 = new Web3();
-*/
 // Number of blocks in the past to look at
 var numLookBackBlocks;
 
@@ -35,12 +24,10 @@ var topmsgidrx = 1000000000;
 // Messenger contract
 var contractAbi = [{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"msgtext","type":"string"}],"name":"sendMessage","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"msgid","type":"uint128"},{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"msgtext","type":"string"}],"name":"ReceiveMessage","type":"event"}];
 var fcthash_sendMessage = "0xde6f24bb";
-//var browser_untitled_sol_messengerContract = web3.eth.contract([{"constant":false,"inputs":[{"name":"funderaddress","type":"address"}],"name":"Messenger","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"text","type":"string"}],"name":"sendMessage","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"msgid","type":"uint128"},{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"text","type":"string"}],"name":"ReceiveMessage","type":"event"}]);
 var messengerContract = web3.eth.contract(contractAbi);
 var messenger;
 
 // Contract addresses
-//var contractAddress_rinkeby = "0x4c065e75e4534cd51cf9660b2704da96c2ca6d89";
 var contractAddress_rinkeby = "0x4f2be1b85eee03e29e5b740f14f694b818f6141d";         // transactionHash: 0xebac0ed9db02a19f3e6859f42e8bd726a8d625dc4d8d1e247c48676264aff724
 var contractAddress_main = "0x932864F3d9D86f52D574A93FE458b5254c6871DB";         // transactionHash: 0x26581e0196a42af96fe057ab0ce6a1711835f3735e5195e694a2bcb308edde4d
 var contractAddress;
@@ -93,11 +80,7 @@ function initSec() {
     $("#li_keyfile").hide();
     $("#li_pwd").hide();
 };
-/*
-function initEth() {
-    web3.setProvider(new web3.providers.HttpProvider(ipaddr_prov));
-};
-*/
+
 function connectBlockchain() {
 
 	try {
@@ -142,6 +125,15 @@ function maintainContactList(contactaddr, blocknr) {
     for (var i=0; i<contacts.length; i++) {
         var contact = contacts.get(i);
 
+        // Mark connected contact as connected (green headline and pressed down, i.e without shadow). This
+        // is necessary here to have the connected contact marked also after refreshes, like it happens 
+        // after changing the look back interval
+        if (contact.id == "contact_" + targetaddress) {
+	        $("#contact_" + targetaddress).css("box-shadow", "none");
+	        $("#contact_" + targetaddress).css("top", "5px");
+	        $("#contact_" + targetaddress + " .contactname").css("backgroundColor", "#00bb00");
+        }
+        
         // Check if there is a contact card vor the passed contact
         if (contact.id == "contact_" + contactaddr.toLowerCase()) {
 
@@ -173,7 +165,7 @@ function clearContactList() {
 
         // Remove all contact cards but the add card
         if (contact.id !== "contact_1") $("#"+contact.id).remove();
-}
+    }
 
     // Adjust number of new messages and update display
     numnewmsgs[targetaddress] = 0;
@@ -344,9 +336,6 @@ function stopGeneralWatchers() {
 
 function setupGeneralWatchers() {
 
-    //if (receiveAllEvent !== undefined) receiveAllEvent.stopWatching();
-    //if (sentAllEvent !== undefined) sentAllEvent.stopWatching();
-    //if (newBlockFilter !== undefined) newBlockFilter.stopWatching();
     stopGeneralWatchers();
     
     numnewmsgs = {};
@@ -444,8 +433,6 @@ function connect(targetadr) {
         $("#conversation").show();
         $("#transfer").show();
 
-//        clearMessages();
-
         setupContactWatchers();
     }
     catch(err) {
@@ -463,8 +450,6 @@ function setupContactWatchers() {
 
     clearMessages();
 
-    //if (receiveMessageEvent !== undefined) receiveMessageEvent.stopWatching();
-    //if (sentMessageEvent !== undefined) sentMessageEvent.stopWatching();
     stopContactWatchers();
     
     // Event to track received messages for conversation
@@ -533,11 +518,6 @@ function sendMsgWithParams(msgtext) {
     var msgtextstr = stringEnc(msgtext);
     data += msgtextstr;
 
-/*
-    console.log("data: " + data);
-    console.log("Sending message...");
-*/
-
     sendTransaction({sender: myaddress, receiver: contractAddress, amount: new BigNumber("0"), data: data},
         function (error, txhash){
             if (error) {
@@ -545,8 +525,6 @@ function sendMsgWithParams(msgtext) {
                 showError("Error sending message. " + error);
             }
             else {
-//                console.log('Transaction sent with success. Transaction hash: ' + txhash);
-
                 printMessage2(topmsgidtx.toString(10), new Date(), myaddress, msgtext, "txmessage", "rgba(10, 10, 10, 0.3)");
                 topmsgidtx++;
 
@@ -560,10 +538,7 @@ function sendEther() {
 
     var value = new BigNumber(verifyNumStr(document.getElementById('trf_value').value));
     var data = verifyHexStr(document.getElementById('trf_data').value);
-/*
-    console.log("value: " + value);
-    console.log("Sending transaction...");
-*/
+
     sendTransaction({sender: myaddress, receiver: targetaddress, amount: value, data: data},
         function (error, txhash){
             if (error) {
@@ -571,8 +546,6 @@ function sendEther() {
                 showError("Error sending transaction. " + error);
             }
             else {
-//                console.log('Transaction sent with success. Transaction hash: ' + txhash);
-
                 document.getElementById('pop_addmsgethvalue').innerHTML = value.toString(10) + " ETH ";
                 document.getElementById('pop_addmsgtxtarget').innerHTML = targetaddress;
 
