@@ -1,6 +1,7 @@
 
 function showError(errormsg) {
     document.getElementById('pop_txerrormsg').innerHTML = errormsg;
+    console.log(errormsg);
     $("#txerror").show();
 }
 

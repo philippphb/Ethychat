@@ -1,6 +1,12 @@
 
 function loginButtonPressed() {
     myaddress = fullVerifyAddress(document.getElementById('from').value);
+    
+    if (myaddress === undefined) {
+    	showError("Invalid address");
+    	return;
+    }
+
     login();
 }
 
@@ -40,8 +46,14 @@ function networkSelected(evt) {
     login();
 }
 
-function addContactButtonPressed(evt) {
-	var targetaddr = fullVerifyAddress(evt.target.value);
+function addContactButtonPressed() {
+	var targetaddr = fullVerifyAddress(document.getElementById('to').value);
+	
+    if (targetaddr === undefined) {
+    	showError("Invalid address");
+    	return;
+    }
+
 	connect(targetaddr);
 }
 
