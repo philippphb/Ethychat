@@ -501,7 +501,7 @@ function setupContactWatchers() {
 function sendMsgWithParams(msgtext) {
 
     markMessagesAsRead();
-
+/*
     var zerostr = "0000000000000000000000000000000000000000000000000000000000000000";
 
     //var data = "0xde6f24bb";
@@ -523,7 +523,9 @@ function sendMsgWithParams(msgtext) {
     // set param "msgtext"
     var msgtextstr = stringEnc(msgtext);
     data += msgtextstr;
-
+*/  
+    var data = messenger.sendMessage.getData(targetaddress, msgtext);
+    
     sendTransaction({sender: myaddress, receiver: contractAddress, amount: new BigNumber("0"), data: data},
         function (error, txhash){
             if (error) {

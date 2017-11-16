@@ -176,7 +176,7 @@ function stringEnc(str) {
 
     // A 32 byte string with all zeros to fill unused spaces
     var zerostr = "0000000000000000000000000000000000000000000000000000000000000000";
-
+/*
     // Convert input string to UTF8
     //var hexstr = web3.fromAscii(str);
     var hexstr = getUTF8HexString(str);
@@ -188,6 +188,20 @@ function stringEnc(str) {
     // Encode input string and add to output. Consider that all data is sent in blocks
     // of 32 bytes (length of zerostr). Strings have trailing zeros for unused spaces.
     hexstr = hexstr.substring(2,hexstr.length);
+    encstr += hexstr;
+    encstr += zerostr.substring(0,zerostr.length-(hexstr.length%zerostr.length));
+*/
+    // Convert input string to UTF8
+    //var hexstr = web3.fromAscii(str);
+    var hexstr = getUTF8HexString(str);
+    hexstr = hexstr.substring(2,hexstr.length);
+
+    // Encode length of the input string and add to encoded string. Numbers have
+    // leading zeros for unused spaces.
+    encstr += intEnc(hexstr.length/2);
+
+    // Add input string to output. Consider that all data is sent in blocks of
+    // 32 bytes (length of zerostr). Strings have trailing zeros for unused spaces.
     encstr += hexstr;
     encstr += zerostr.substring(0,zerostr.length-(hexstr.length%zerostr.length));
 
