@@ -7,43 +7,72 @@ function loginButtonPressed() {
     	return;
     }
 
-    login();
+    prepareLogin();
 }
 
 function retroTimeSelected() {
     numLookBackBlocks = parseInt($("#sel_retrotime").val());
-    startBlockNo = web3.eth.blockNumber - numLookBackBlocks;
 
-    clearContactList();
-    clearMessages();
+    try {
+      	web3.eth.getBlockNumber(function(error, result) {
+      		if(!error) {
+      	        startBlockNo = result - numLookBackBlocks;
 
-    setupGeneralWatchers();
-    setupContactWatchers();
+				clearContactList();
+				clearMessages();
+
+	      	    setupGeneralWatchers();
+	      	    setupContactWatchers();
+      		}
+      	});
+	}
+	catch(err) {
+	    showError(err);
+	}
 }
 
 function networkSelected(evt) {
 
+	// Stop DApp
 	stopGeneralWatchers();
     stopContactWatchers();
+
+	stopInjectedProviderListener();
+
+	web3 = undefined;    
 
     clearContactList();
     clearMessages();
     
     targetaddress = "";
 
-	// Use testnet by default
-    ipaddr_prov = ipaddr_prov_rinkeby;
-    contractAddress = contractAddress_rinkeby;
-
-    if (evt.target.value == "mainnet") {
-    	ipaddr_prov = ipaddr_prov_main;
-    	contractAddress = contractAddress_main;
+	// Use injected provider
+    if (evt.target.value == "injected") {
+        useInjectedProvider();
+    	setupInjectedProviderListener();
     }
 
-    initEth();
+    // Use custom provider for main net
+	else if (evt.target.value == "mainnet") {
+    	ipaddr_prov = ipaddr_prov_main;
+    	contractAddress = contractAddress_main;
+
+        initEth();
+    }
+        
+	// Use testnet by default
+    else {
+        ipaddr_prov = ipaddr_prov_rinkeby;
+        contractAddress = contractAddress_rinkeby;
+
+        initEth();
+    }
+
+    // Restart DApp
+    messengerContract = web3.eth.contract(contractAbi);
     connectBlockchain();
     
-    login();
+    prepareLogin();
 }
 
 function addContactButtonPressed() {
@@ -54,7 +83,7 @@ function addContactButtonPressed() {
     	return;
     }
 
-	connect(targetaddr);
+	prepareConnect(targetaddr);
 }
 
 function sendMsgButtonPressed() {

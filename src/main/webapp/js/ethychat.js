@@ -24,7 +24,7 @@ var topmsgidrx = 1000000000;
 // Messenger contract
 var contractAbi = [{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"msgtext","type":"string"}],"name":"sendMessage","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"msgid","type":"uint128"},{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"msgtext","type":"string"}],"name":"ReceiveMessage","type":"event"}];
 var fcthash_sendMessage = "0xde6f24bb";
-var messengerContract = web3.eth.contract(contractAbi);
+var messengerContract;
 var messenger;
 
 // Contract addresses
@@ -43,12 +43,37 @@ var receiveMessageEvent;
 var sentMessageEvent;
 var newBlockFilter;
 
+// Time for updating account info and network info if an injected
+// provider is used
+var accountTimer;
 
+
+window.addEventListener('load', function() {
+	init();
+});
+	
 function init() {
-    initPage();
-    initEth();
+
+	// Use testnet by default
+    ipaddr_prov = ipaddr_prov_rinkeby;
+    contractAddress = contractAddress_rinkeby;
+    networkid = networkid_rinkeby;
+
+    connectBlockNo = 4000000;
     
+    // Blockchain initialization
+    initEth();
+    messengerContract = web3.eth.contract(contractAbi);
+
+    // Page initialization
+    initPage();
+    numLookBackBlocks = parseInt($("#sel_retrotime").val());
+
+    // Startup DApp
     connectBlockchain();
+    if (isInjectedProvider()) {
+    	setupInjectedProviderListener();
+    }
 };
 
 function initPage() {
@@ -57,18 +82,20 @@ function initPage() {
     $("#sel_network").val("rinkeby");
     $("#message").val("");
     $("#trf_value").val("0");
-    $("#trf_data").val("");
-
+    $("#trf_data").val("");sel_network
+    	
     $("#conversation").hide();
     $("#transfer").hide();
 
-    numLookBackBlocks = parseInt($("#sel_retrotime").val());
-    ipaddr_prov = ipaddr_prov_rinkeby;
-    contractAddress = contractAddress_rinkeby;
+    // Add injected provider to netwok select menu if injected provider
+    // is present, set injected provider as selected provider 
+    if (isInjectedProvider()) {
+        $("#sel_network").append($('<option></option>').val("injected").html("Injected provider"));
+        $("#sel_network").val("injected");
+    }
 
-    networkid = networkid_rinkeby;
-    
-    initSec();
+    // Init security relevant controls
+    initSec();    
 };
 
 function initSec() {
@@ -86,6 +113,60 @@ function initSec() {
     $("#li_keyfile").hide();
     $("#li_pwd").hide();
 };
+
+function setupInjectedProviderListener() {
+	
+	myaddress = undefined;
+	networkid = undefined
+	
+	// Start timer
+	accountTimer = setInterval(function() {
+		
+		// Handle account changes done through the injected provider
+		if (myaddress !== web3.eth.accounts[0]) {
+			  
+			logout();
+			myaddress = web3.eth.accounts[0];
+			  
+			if (myaddress !== undefined) {
+				prepareLogin();
+				//login();
+			}
+		}
+		
+		// Handle network changes done through the injected provider
+		web3.version.getNetwork(function(error, result) {
+			if (!error) {
+				if (networkid !== result) {
+					
+					networkid = result;
+					
+					if (networkid == 1) contractAddress = contractAddress_main;
+					else if (networkid == 4) contractAddress = contractAddress_rinkeby;	
+					
+					if (networkid !== undefined) {
+						stopGeneralWatchers();
+					    stopContactWatchers();
+
+					    clearContactList();
+					    clearMessages();
+					    
+					    targetaddress = "";
+
+					    messengerContract = web3.eth.contract(contractAbi);
+
+						connectBlockchain();
+						prepareLogin();
+					}
+				}
+			}
+		});
+	}, 300);
+}
+
+function stopInjectedProviderListener() {
+	if (accountTimer !== undefined) clearInterval(accountTimer);
+}
 
 function connectBlockchain() {
 
@@ -156,7 +237,7 @@ function maintainContactList(contactaddr, blocknr) {
 
     // Add new contact card and select-entry for the passed contact if no card was found
     if (found === 0) {
-        $("#"+contacts.get(0).id).before("<div class=\"contactcard\" id=\"contact_" + contactaddr.toLowerCase() + "\" onclick=\"connect(\'" + contactaddr + "\')\"> <div class=\"contactname\">" + contactaddr + "</div> <img class=\"contactimg\" src=\"https://www.gravatar.com/avatar/" + contactaddr.substring(2,contactaddr.length).toLowerCase() + "?d=retro&s=40\">" + "<div class=\"newmsgtext\">new<br>messages</div> <div class=\"msgstate\"> <span class=\"numnewmsgs\" id=\"numnewmsgs_" +  contactaddr.toLowerCase() + "\"> </span> </div></div>");
+        $("#"+contacts.get(0).id).before("<div class=\"contactcard\" id=\"contact_" + contactaddr.toLowerCase() + "\" onclick=\"prepareConnect(\'" + contactaddr + "\')\"> <div class=\"contactname\">" + contactaddr + "</div> <img class=\"contactimg\" src=\"https://www.gravatar.com/avatar/" + contactaddr.substring(2,contactaddr.length).toLowerCase() + "?d=retro&s=40\">" + "<div class=\"newmsgtext\">new<br>messages</div> <div class=\"msgstate\"> <span class=\"numnewmsgs\" id=\"numnewmsgs_" +  contactaddr.toLowerCase() + "\"> </span> </div></div>");
         $("#sel_contact").append($('<option></option>').val(contactaddr).html(contactaddr));
     }
 };
@@ -191,8 +272,7 @@ function printMessage2(msgid, msgdate, from, text, msgclass, msgbgcolor) {
 
         // Put message into conversation, order descending by message id
         if (parseInt(message.id) < parseInt(msgid)) {
-            //$("#"+message.id).before("<div class=\"message\" id=\"" + msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> (" + msgid + "), " + msgdate + " </div> <div class=\"msgtext\">" + text + "</div></div></div>");
-            $("#"+message.id).before("<div class=\"message\" id=\"" + msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + cleanupText(text) + "</div></div></div>");
+            $("#"+message.id).before("<div class=\"message\" id=\"" + msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + cleanupAndFormat(text) + "</div></div></div>");
             $("#"+msgid).children().css("backgroundColor", msgbgcolor);
 
             break;
@@ -200,10 +280,20 @@ function printMessage2(msgid, msgdate, from, text, msgclass, msgbgcolor) {
     }
 };
 
-function printMessage(ethevent, msgclass, msgbgcolor) {
+// Carry out asynchronous request required for printing a message
+function preparePrintMessage(ethevent, msgclass, msgbgcolor) {
 
-    var msgblock = web3.eth.getBlock(ethevent.blockNumber);
-    var msgdate = new Date(msgblock.timestamp*1000);
+	web3.eth.getBlock(ethevent.blockNumber, function(error, result) {
+		if(!error) {
+		    var msgdate = new Date(result.timestamp*1000);
+		    printMessage(ethevent, msgdate, msgclass, msgbgcolor);
+		}
+	});
+
+}
+
+// Print message
+function printMessage(ethevent, msgdate, msgclass, msgbgcolor) {
 
     var messages = $(".message");
 
@@ -216,8 +306,7 @@ function printMessage(ethevent, msgclass, msgbgcolor) {
 
         // Put message into conversation, order descending by message id
         if (parseInt(message.id) < parseInt(ethevent.args.msgid)) {
-            //$("#"+message.id).before("<div class=\"message\" id=\"" + ethevent.args.msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> (" + ethevent.args.msgid + "), " + msgdate + " </div> <div class=\"msgtext\">" + ethevent.args.msgtext + "</div></div></div>");
-            $("#"+message.id).before("<div class=\"message\" id=\"" + ethevent.args.msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + cleanupText(ethevent.args.msgtext) + "</div></div></div>");
+            $("#"+message.id).before("<div class=\"message\" id=\"" + ethevent.args.msgid + "\"> <div class=\"" + msgclass + "\"> <div class=\"timestamp\"> " + msgdate + " </div> <div class=\"msgtext\">" + cleanupAndFormat(ethevent.args.msgtext) + "</div></div></div>");
             if (connectBlockNo <= ethevent.blockNumber) $("#"+ethevent.args.msgid).children().css("backgroundColor", msgbgcolor);
 
             break;
@@ -297,12 +386,27 @@ function logout() {
     $("#transfer").hide();
 };
 
+//Carry out asynchronous request required for login
+function prepareLogin() {
+    
+	try {
+    	web3.eth.getBlockNumber(function(error, result) {
+    		if(!error) {
+    			connectBlockNo = result;
+    	        startBlockNo = connectBlockNo - numLookBackBlocks;
+                login();
+    		}
+    	});
+    }
+    catch(err) {
+        showError(err);
+    }
+}
+
+// Do login
 function login() {
 
     try {
-        connectBlockNo = web3.eth.blockNumber;
-
-        startBlockNo = web3.eth.blockNumber - numLookBackBlocks;
 
         clearMessages();
         resetTxHandling();
@@ -319,7 +423,11 @@ function login() {
         // Update header with account info of logged in account
         document.getElementById('loggedinname').innerHTML = myaddress;
         document.getElementById('loggedinimg').innerHTML = "<img src=\"https://www.gravatar.com/avatar/" + myaddress.substring(2,34).toLowerCase() + "?d=retro&s=64\">";
-        document.getElementById('loggedinbalance').innerHTML = web3.eth.getBalance(myaddress).dividedBy(new BigNumber("1000000000000000000")) + " ETH ";
+    	web3.eth.getBalance(myaddress, function(error, result) {
+    		if (!error) {
+    	        document.getElementById('loggedinbalance').innerHTML = result.dividedBy(new BigNumber("1000000000000000000")) + " ETH ";
+    		}
+    	});
 
         // Reset security relevant account specific variables with every login
         mypwd = "";
@@ -395,7 +503,11 @@ function setupGeneralWatchers() {
     newBlockFilter = web3.eth.filter('latest');
     newBlockFilter.watch(function (error, log) {
         if (!error) {
-            document.getElementById('loggedinbalance').innerHTML = web3.eth.getBalance(myaddress).dividedBy(new BigNumber("1000000000000000000")) + " ETH ";
+        	web3.eth.getBalance(myaddress, function(error, result) {
+        		if (!error) {
+        			document.getElementById('loggedinbalance').innerHTML = result.dividedBy(new BigNumber("1000000000000000000")) + " ETH ";
+        		}
+        	});
         }
         else {
             console.log(error, result);
@@ -404,7 +516,8 @@ function setupGeneralWatchers() {
     });
 };
 
-function connect(targetadr) {
+// Carry out asynchronous request required for connecting to an account
+function prepareConnect(targetadr) {
 
 	// Do not connect to invalid addresses
     if (targetadr === undefined) return;
@@ -413,8 +526,23 @@ function connect(targetadr) {
     if (targetaddress !== undefined && targetaddress.toLowerCase() === targetadr.toLowerCase()) return;
 
     try {
-        connectBlockNo = web3.eth.blockNumber;
-        startBlockNo = web3.eth.blockNumber - numLookBackBlocks;
+    	web3.eth.getBlockNumber(function(error, result) {
+    		if(!error) {
+    			connectBlockNo = result;
+    	        startBlockNo = connectBlockNo - numLookBackBlocks;
+    	        connect(targetadr);
+    		}
+    	});
+    }
+    catch(err) {
+        showError(err);
+    }
+}
+    
+// connect to an account
+function connect(targetadr) {
+
+    try {
 
         // Mark the previous connected contact as not connected (grey headline and not pressed down, i.e with shadow)
         if (targetaddress !== undefined) {
@@ -468,7 +596,8 @@ function setupContactWatchers() {
             updateNumMessageDisplay(result.args.from);
 
             // Add message to conversation
-            printMessage(result, "rxmessage", "#00b000");
+            //printMessage(result, "rxmessage", "#00b000");
+            preparePrintMessage(result, "rxmessage", "#00b000");
         }
         else {
             console.log(error, result);
@@ -489,7 +618,8 @@ function setupContactWatchers() {
             updateNumMessageDisplay(result.args.to);
 */
             // Add message to conversation
-            printMessage(result, "txmessage", "rgba(255, 255, 255, 0.9)");
+            //printMessage(result, "txmessage", "rgba(255, 255, 255, 0.9)");
+            preparePrintMessage(result, "txmessage", "rgba(255, 255, 255, 0.9)");
         }
         else {
             console.log(error, result);
@@ -501,35 +631,12 @@ function setupContactWatchers() {
 function sendMsgWithParams(msgtext) {
 
     markMessagesAsRead();
-/*
-    var zerostr = "0000000000000000000000000000000000000000000000000000000000000000";
 
-    //var data = "0xde6f24bb";
-    var data = fcthash_sendMessage;
-
-    var fieldpos = 0;
-    var fieldposstr;
-
-    // Set param "to"
-    var targetaddressstr = targetaddress.substring(2,targetaddress.length);
-    data += zerostr.substring(0,zerostr.length-targetaddressstr.length);
-    data += targetaddressstr;
-    fieldpos += 32;
-
-    // Set position of variable length fields
-    fieldpos += 1*32;
-    data += intEnc(fieldpos);
-
-    // set param "msgtext"
-    var msgtextstr = stringEnc(msgtext);
-    data += msgtextstr;
-*/  
     var data = messenger.sendMessage.getData(targetaddress, msgtext);
     
-    sendTransaction({sender: myaddress, receiver: contractAddress, amount: new BigNumber("0"), data: data},
+    addTransaction({sender: myaddress, receiver: contractAddress, amount: new BigNumber("0"), data: data},
         function (error, txhash){
             if (error) {
-                console.log("Error sending message: " + error);
                 showError("Error sending message. " + error);
             }
             else {
@@ -547,10 +654,9 @@ function sendEther() {
     var value = new BigNumber(verifyNumStr(document.getElementById('trf_value').value));
     var data = verifyHexStr(document.getElementById('trf_data').value);
 
-    sendTransaction({sender: myaddress, receiver: targetaddress, amount: value, data: data},
+    addTransaction({sender: myaddress, receiver: targetaddress, amount: value, data: data},
         function (error, txhash){
             if (error) {
-                console.log("Error sending transaction: " + error);
                 showError("Error sending transaction. " + error);
             }
             else {
@@ -568,4 +674,3 @@ function sendEther() {
         }
     );
 };
-

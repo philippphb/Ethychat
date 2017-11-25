@@ -63,7 +63,7 @@ function fullVerifyAddress(addr) {
 	return verifyHexStr(lightVerifyAddress(addr));
 }
 
-function cleanupText(str) {
+function cleanupAndFormat(str) {
 
 	if (str === undefined) return undefined;
 
@@ -75,11 +75,26 @@ function cleanupText(str) {
 	for (var p=0; p<str.length; p++) {
 		
 		var curchar = str.charAt(p);
+		var curcharcode = str.charCodeAt(p);
 		
-		if (curchar === "<") istag = true;		
+		if (curchar === "<") istag = true;
 		
 		if (istag) tagstr += curchar;
-		else cleanstr += curchar;
+		else {
+			
+	        // Replace LF/CR by <br>
+			if (curcharcode === 10 ||  curcharcode === 13) {
+				cleanstr += "<br>";
+	        }
+
+			// Replace every other control character by a space
+			if (curcharcode < 32) {
+				cleanstr += " ";
+	        }
+
+	        // Pass on every readable/displayable character
+	        else cleanstr += curchar;
+		}
 		
 		if (curchar === ">") {
 			
@@ -100,7 +115,7 @@ function cleanupText(str) {
 	
 	return cleanstr;
 }
-
+/*
 // Converts the passed string into UTF-8 encoding
 function getUTF8HexString(str) {
 
@@ -176,21 +191,7 @@ function stringEnc(str) {
 
     // A 32 byte string with all zeros to fill unused spaces
     var zerostr = "0000000000000000000000000000000000000000000000000000000000000000";
-/*
-    // Convert input string to UTF8
-    //var hexstr = web3.fromAscii(str);
-    var hexstr = getUTF8HexString(str);
 
-    // Encode length of the input string and add to encoded string. Numbers have
-    // leading zeros for unused spaces.
-    encstr += intEnc(hexstr.length);
-
-    // Encode input string and add to output. Consider that all data is sent in blocks
-    // of 32 bytes (length of zerostr). Strings have trailing zeros for unused spaces.
-    hexstr = hexstr.substring(2,hexstr.length);
-    encstr += hexstr;
-    encstr += zerostr.substring(0,zerostr.length-(hexstr.length%zerostr.length));
-*/
     // Convert input string to UTF8
     //var hexstr = web3.fromAscii(str);
     var hexstr = getUTF8HexString(str);
@@ -207,7 +208,7 @@ function stringEnc(str) {
 
     return encstr;
 };
-
+*/
 function resetTxHandling() {
 
     lastnonce = 0;
@@ -226,11 +227,7 @@ function resetTxHandling() {
 
     resetAuth();
 };
-/*
-function selectauthduration(evt){
-//    authduration = parseInt(evt.target.value);
-};
-*/
+
 function resetAuth() {
     authmethod = "";
     mypwd = "";
@@ -242,7 +239,7 @@ function removeCurTransaction() {
     curtx_callback = undefined;
 };
 
-function sendTransaction(tx, callback) {
+function addTransaction(tx, callback) {
 
 	// Put the passed transaction into transaction ring buffer
     txbuf[wridx] = tx;
@@ -274,9 +271,17 @@ function processTransactions() {
     rdidx++;
     if (rdidx >= ringbufsize) rdidx = 0;
 
-    // Trigger authentication if required
-    if (authmethod === "") $("#authentication").show();
-    else sendAuthenticatedTransaction();
+    // If injected provider is used, the application does not have to
+    // take care of signing the transaction
+	if (isInjectedProvider()) {
+		sendUnsignedTransaction();
+	}
+	
+	// With custom provider, transaction has to be signed
+	else {
+	    if (authmethod === "") $("#authentication").show();
+	    else sendAuthenticatedTransaction();
+	}
 };
 
 function sendAuthenticatedTransaction() {
@@ -287,7 +292,57 @@ function sendAuthenticatedTransaction() {
         document.getElementById('pop_sendethtarget').innerHTML = " " + curtx.receiver + " ";
         $("#confirmsendeth").show();
     }
-    else sendSignedTransaction();
+    else {
+    	sendSignedTransaction();
+    }
+};
+
+function sendUnsignedTransaction() {
+
+	// Get params of current transaction
+    var sender = curtx.sender;
+    var receiver = curtx.receiver;
+    var data = curtx.data;
+    var amount = "0x" + curtx.amount.times(new BigNumber("1000000000000000000")).toString(16);    
+    var callback = curtx_callback;
+
+    removeCurTransaction();
+
+	// Adapt to current gas price
+	web3.eth.getGasPrice(function(error, result) {
+		if (!error) {
+			var curgasprice = result;
+		    console.log("gas price: " + curgasprice.toString(10) + "/" + curgasprice.toString(16));
+			
+		    // Create transaction
+		    const txParams = {
+		    		from: sender,
+		    		to: receiver,
+		    		value: amount,
+		    		gas: '0x3d090',
+		    		gasPrice:"0x" + curgasprice.toString(16),
+		    		data: data
+		    };
+		
+		    try {
+				// Send transaction
+				web3.eth.sendTransaction(txParams, callback);
+		    }
+		    catch(err) {
+		    	showError("Error during sending transaction. " + err);
+		    	resetAuth();
+		        txProcessing = false;
+		        processTransactions();
+		        return;
+		    }
+		}
+		
+	    // Reset authentication parameters if validity was for a single transaction only
+	    if (authduration < 0) resetAuth();
+
+	    txProcessing = false;
+	    processTransactions();
+	});
 };
 
 function sendSignedTransaction() {
@@ -318,10 +373,10 @@ function sendSignedTransaction() {
 	    processTransactions();
 	    return;
     }
-
+/*
     // Reset authentication parameters if validity was for a single transaction only
     if (authduration < 0) resetAuth();
-
+*/
     // Make sure that nonce increases to avoid replacement transactions and thus to enable
     // several messages that are sent within less than a block time 
     var curnonce = web3.eth.getTransactionCount(sender);
@@ -351,15 +406,18 @@ function sendSignedTransaction() {
         web3.eth.sendRawTransaction(serializedTx, callback);
     }
     catch(err) {
-    	showError("Error during signing transaction. " + err);
+    	showError("Error during sending transaction. " + err);
     	resetAuth();
         txProcessing = false;
         processTransactions();
         return;
     }
-	
+
+    // Reset authentication parameters if validity was for a single transaction only
+    if (authduration < 0) resetAuth();
+
     txProcessing = false;
-    processTransactions();
+    processTransactions();    
 };
 
 
