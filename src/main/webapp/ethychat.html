@@ -26,8 +26,10 @@
     <script type="text/javascript" src="js/popup.js"></script>
     
 </head>
-
+<!-- 
 <body onload="init()">
+ -->
+<body>
 
     <div class="background">
     </div>        
@@ -83,6 +85,7 @@
                     <option value="5760">24 hours</option>
                     <option value="17280">3 days</option>
                     <option value="40320">week</option>
+					<option value="172800">month</option>
                 </select>
                 </span>
             </div>
@@ -217,7 +220,7 @@
             <div class="popupinputheadline">Transaction Confirmation</div>   
             <div class="inputhline"></div>
             <div class="popupcontent">
-                You are about to sendbr>
+                You are about to send
                 <div id="pop_sendethvalue"> X Eth </div>
                 to
                 <div id="pop_sendethtarget"> account </div>
