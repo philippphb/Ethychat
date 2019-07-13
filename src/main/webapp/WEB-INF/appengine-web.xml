@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+
+  <threadsafe>true</threadsafe>
+  <sessions-enabled>false</sessions-enabled>
+  <runtime>java8</runtime>
+
+  <!-- Configure static access (will not be handlede through filters) -->
+  <static-files>
+    <!-- <include path="**" /> -->
+    <!-- <include path="/**.ico" /> -->
+    <!-- <include path="/img/**" /> -->
+    <!-- <include path="/fonts/**" /> -->
+    <!-- <include path="/js/**" /> -->
+    <!-- <include path="/css/**" /> -->
+    <exclude path="/**" />
+  </static-files>
+
+  <!-- Configure java.util.logging -->
+  <system-properties>
+    <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
+  </system-properties>
+
+</appengine-web-app>
