@@ -27,6 +27,10 @@ var txProcessing = false;
 var curtx = undefined;
 var curtx_callback = undefined;
 
+//
+var normalGasLimit = '0x3d090';
+var largeGasLimit = '0x47b760';
+
 
 // Returns undefined if the passed string is not a number
 function verifyNumStr(str) {
@@ -308,12 +312,14 @@ function sendUnsignedTransaction() {
 
     removeCurTransaction();
 
+//    if (receiver === "0x0000000000000000000000000000000000000000") receiver = "";
+
 	// Adapt to current gas price
 	web3.eth.getGasPrice(function(error, result) {
 		if (!error) {
 			var curgasprice = result;
 		    console.log("gas price: " + curgasprice.toString(10) + "/" + curgasprice.toString(16));
-			
+/*
 		    // Create transaction
 		    const txParams = {
 		    		from: sender,
@@ -323,7 +329,32 @@ function sendUnsignedTransaction() {
 		    		gasPrice:"0x" + curgasprice.toString(16),
 		    		data: data
 		    };
-		
+*/
+		    var txParams;
+		    if (receiver === "0x0000000000000000000000000000000000000000") {
+			    // Create transaction
+			    txParams = {
+			    		from: sender,
+			    		value: amount,
+			    		//gas: '0x47b760',
+			    		gas: largeGasLimit,
+			    		gasPrice:"0x" + curgasprice.toString(16),
+			    		data: data
+			    };		    	
+		    }
+		    else {
+			    // Create transaction
+			    txParams = {
+			    		from: sender,
+			    		to: receiver,
+			    		value: amount,
+			    		//gas: '0x3d090',
+			    		gas: normalGasLimit,
+			    		gasPrice:"0x" + curgasprice.toString(16),
+			    		data: data
+			    };
+		    }
+		    
 		    try {
 				// Send transaction
 				web3.eth.sendTransaction(txParams, callback);
@@ -355,7 +386,9 @@ function sendSignedTransaction() {
     var callback = curtx_callback;
 
     removeCurTransaction();
-		
+
+    if (receiver === "0x0000000000000000000000000000000000000000") receiver = "";
+    
     let privateKey;
     
 	try {
@@ -386,7 +419,7 @@ function sendSignedTransaction() {
     // Adapt to current gas price
     var curgasprice = web3.eth.gasPrice;
     console.log("gas price: " + curgasprice.toString(10) + "/" + curgasprice.toString(16));
-
+/*
     // Create transaction
     const txParams = {
     		nonce: curnonce,
@@ -397,7 +430,34 @@ function sendSignedTransaction() {
     		data: data,
     		chainId: networkid
     };
-	
+*/
+    var txParams;
+    if (receiver === "0x0000000000000000000000000000000000000000") {
+	    // Create transaction
+	    txParams = {
+	    		nonce: curnonce,
+	    		gasPrice: "0x" + curgasprice.toString(16),
+	    		//gasLimit: '0x47b760',
+	    		gasLimit: largeGasLimit,
+	    		value: amount, 
+	    		data: data,
+	    		chainId: networkid
+	    };		    	
+    }
+    else {
+	    // Create transaction
+	    txParams = {
+	    		nonce: curnonce,
+	    		gasPrice: "0x" + curgasprice.toString(16),
+	    		//gasLimit: '0x3d090',
+	    		gasLimit: normalGasLimit,
+	    		to: receiver,
+	    		value: amount, 
+	    		data: data,
+	    		chainId: networkid
+	    };
+    }
+
 	try {
 		// Sign and send transactrion
         let tx = new EthJS.Tx(txParams);

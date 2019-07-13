@@ -105,9 +105,11 @@ function initSec() {
     $("#inp_keyfile").val("");
     $("#inp_pwd").val("");
     $("#inp_pkey").val("");
-    $("#rad_thistx").prop("checked", true );
+    //$("#rad_thistx").prop("checked", true );
+    $("#rad_thistx").prop("checked", false );
     $("#rad_10min").prop("checked", false );
-    $("#rad_1hr").prop("checked", false );
+    //$("#rad_1hr").prop("checked", false );
+    $("#rad_1hr").prop("checked", true );
 
     $("#li_pkey").hide();
     $("#li_keyfile").hide();
